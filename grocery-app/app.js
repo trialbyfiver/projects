@@ -4,8 +4,7 @@ import {
   doc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
-  GoogleAuthProvider, signInWithPopup, signInWithRedirect,
-  getRedirectResult, onAuthStateChanged, signOut
+  GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -18,29 +17,12 @@ const signoutBtn  = document.getElementById("signout-btn");
 const userAvatar  = document.getElementById("user-avatar");
 const authError   = document.getElementById("auth-error");
 
-// Detect mobile — iOS Safari blocks popups, so use redirect on mobile
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.navigator.standalone === true;
-
-// Handle redirect result coming back from Google
-getRedirectResult(auth).then(result => {
-  if (result?.user) {
-    // auth state will be picked up by onAuthStateChanged
-  }
-}).catch(err => {
-  authError.textContent = "Sign-in failed. Please try again.";
-  console.error(err);
-});
-
 signinBtn.addEventListener("click", async () => {
   signinBtn.disabled = true;
   signinBtn.textContent = "Signing in…";
   authError.textContent = "";
   try {
-    if (isMobile) {
-      await signInWithRedirect(auth, provider);
-    } else {
-      await signInWithPopup(auth, provider);
-    }
+    await signInWithPopup(auth, provider);
   } catch (err) {
     console.error(err);
     authError.textContent = "Sign-in failed: " + (err.message || "Please try again.");

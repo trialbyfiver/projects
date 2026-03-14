@@ -18,11 +18,15 @@ const signoutBtn  = document.getElementById("signout-btn");
 const userAvatar  = document.getElementById("user-avatar");
 const authError   = document.getElementById("auth-error");
 
-// Detect iOS standalone (PWA) mode — popups are blocked there, use redirect
-const isIOSStandalone = window.navigator.standalone === true;
+// Detect mobile — iOS Safari blocks popups, so use redirect on mobile
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.navigator.standalone === true;
 
-// Handle redirect result coming back from Google (iOS standalone flow)
-getRedirectResult(auth).catch(err => {
+// Handle redirect result coming back from Google
+getRedirectResult(auth).then(result => {
+  if (result?.user) {
+    // auth state will be picked up by onAuthStateChanged
+  }
+}).catch(err => {
   authError.textContent = "Sign-in failed. Please try again.";
   console.error(err);
 });
@@ -32,11 +36,9 @@ signinBtn.addEventListener("click", async () => {
   signinBtn.textContent = "Signing in…";
   authError.textContent = "";
   try {
-    if (isIOSStandalone) {
-      // Redirect works in iOS PWA standalone mode
+    if (isMobile) {
       await signInWithRedirect(auth, provider);
     } else {
-      // Popup works in regular browser (Safari, Chrome, etc.)
       await signInWithPopup(auth, provider);
     }
   } catch (err) {

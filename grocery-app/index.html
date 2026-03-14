@@ -14,44 +14,71 @@
 </head>
 <body>
 
-  <header>
-    <h1>🛒 Grocery List</h1>
-    <button id="share-btn" aria-label="Share list">Share</button>
-  </header>
+  <!-- Sign-in overlay -->
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-logo">🛒</div>
+      <h1>Grocery List</h1>
+      <p>Sign in to access and share your grocery list</p>
+      <button id="signin-btn">
+        <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <p id="auth-error" class="auth-error"></p>
+    </div>
+  </div>
 
-  <!-- Add item form -->
-  <section class="add-section">
-    <form id="add-form" autocomplete="off">
-      <input id="input-item"   type="text"   placeholder="Item *"   required />
-      <input id="input-amount" type="text"   placeholder="Amount"  />
-      <input id="input-store"  type="text"   placeholder="Store"   />
-      <button type="submit">Add</button>
-    </form>
-  </section>
+  <!-- Main app (hidden until signed in) -->
+  <div id="app" hidden>
+    <header>
+      <h1>🛒 Grocery List</h1>
+      <div class="header-actions">
+        <button id="share-btn" aria-label="Share list">Share</button>
+        <button id="signout-btn" aria-label="Sign out" title="Sign out">
+          <img id="user-avatar" src="" alt="" width="28" height="28" />
+        </button>
+      </div>
+    </header>
 
-  <!-- Filters -->
-  <section class="filter-section">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="notbought">Not Bought</button>
-    <button class="filter-btn" data-filter="bought">Bought</button>
-  </section>
+    <!-- Add item form -->
+    <section class="add-section">
+      <form id="add-form" autocomplete="off">
+        <input id="input-item"   type="text" placeholder="Item *"  required />
+        <input id="input-amount" type="text" placeholder="Amount" />
+        <input id="input-store"  type="text" placeholder="Store"  />
+        <button type="submit">Add</button>
+      </form>
+    </section>
 
-  <!-- Grocery table -->
-  <section class="table-section">
-    <table>
-      <thead>
-        <tr>
-          <th class="col-item">Item</th>
-          <th class="col-amount">Amount</th>
-          <th class="col-store">Store</th>
-          <th class="col-check">✓</th>
-          <th class="col-del"></th>
-        </tr>
-      </thead>
-      <tbody id="item-tbody"></tbody>
-    </table>
-    <p id="empty-msg">No items yet. Add one above!</p>
-  </section>
+    <!-- Filters -->
+    <section class="filter-section">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="notbought">Not Bought</button>
+      <button class="filter-btn" data-filter="bought">Bought</button>
+    </section>
+
+    <!-- Grocery table -->
+    <section class="table-section">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-item">Item</th>
+            <th class="col-amount">Amount</th>
+            <th class="col-store">Store</th>
+            <th class="col-check">✓</th>
+            <th class="col-del"></th>
+          </tr>
+        </thead>
+        <tbody id="item-tbody"></tbody>
+      </table>
+      <p id="empty-msg">No items yet. Add one above!</p>
+    </section>
+  </div>
 
   <div id="toast"></div>
 

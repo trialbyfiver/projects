@@ -224,6 +224,105 @@ tr.bought .col-item { text-decoration: line-through; }
   transform: translateX(-50%) translateY(0);
 }
 
+/* ── Auth Overlay ──────────────────────────────────────────────────────────── */
+#auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--green-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.auth-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.12);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+}
+
+.auth-logo {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: .75rem;
+}
+
+.auth-card h1 {
+  font-size: 1.6rem;
+  color: var(--green-dark);
+  margin-bottom: .5rem;
+}
+
+.auth-card > p {
+  color: var(--gray);
+  font-size: .95rem;
+  margin-bottom: 2rem;
+}
+
+#signin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  width: 100%;
+  padding: .85rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+  min-height: 52px;
+}
+#signin-btn:hover   { background: #f8f8f8; box-shadow: var(--shadow); }
+#signin-btn:active  { transform: scale(.98); }
+#signin-btn:disabled { opacity: .6; cursor: default; }
+
+.auth-error {
+  color: var(--red);
+  font-size: .85rem;
+  margin-top: 1rem;
+  min-height: 1.2em;
+}
+
+/* ── Header actions ────────────────────────────────────────────────────────── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+#signout-btn {
+  background: rgba(255,255,255,.15);
+  border: 1.5px solid rgba(255,255,255,.4);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity .2s;
+}
+#signout-btn:hover { opacity: .85; }
+
+#user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: block;
+  object-fit: cover;
+}
+
 /* ── Responsive (larger screens) ───────────────────────────────────────────── */
 @media (min-width: 600px) {
   .add-section, .filter-section, .table-section {

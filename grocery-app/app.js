@@ -4,7 +4,8 @@ import {
   doc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
-  GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+  GoogleAuthProvider, signInWithPopup, signInWithRedirect,
+  getRedirectResult, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -17,21 +18,43 @@ const signoutBtn  = document.getElementById("signout-btn");
 const userAvatar  = document.getElementById("user-avatar");
 const authError   = document.getElementById("auth-error");
 
+// Safari detection — popup is unreliable in Safari; use redirect instead
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+// Handle redirect result on page load (Safari flow)
+getRedirectResult(auth).catch(err => console.error("Redirect result error:", err));
+
+// L2 — friendly error messages
+const AUTH_ERRORS = {
+  "auth/popup-blocked":        "Popup was blocked. Please allow popups and try again.",
+  "auth/popup-closed-by-user": "Sign-in was cancelled.",
+  "auth/network-request-failed": "Network error. Please check your connection.",
+  "auth/too-many-requests":    "Too many attempts. Please try again later.",
+};
+
 signinBtn.addEventListener("click", async () => {
   signinBtn.disabled = true;
   signinBtn.textContent = "Signing in…";
   authError.textContent = "";
   try {
-    await signInWithPopup(auth, provider);
+    if (isSafari) {
+      await signInWithRedirect(auth, provider); // redirect works reliably in Safari with matching authDomain
+    } else {
+      await signInWithPopup(auth, provider);
+    }
   } catch (err) {
     console.error(err);
-    authError.textContent = "Sign-in failed: " + (err.message || "Please try again.");
+    authError.textContent = AUTH_ERRORS[err.code] || "Sign-in failed. Please try again.";
     signinBtn.disabled = false;
     signinBtn.innerHTML = googleBtnInner();
   }
 });
 
-signoutBtn.addEventListener("click", () => signOut(auth));
+// L4 — clear URL on sign-out
+signoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  window.history.replaceState({}, "", window.location.pathname);
+});
 
 let unsubscribeItems = null;
 
@@ -54,15 +77,18 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ── List ID (shared via URL) ──────────────────────────────────────────────────
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function getListId() {
   const params = new URLSearchParams(window.location.search);
   let id = params.get("list");
-  if (!id) {
+  // M2 — validate UUID format; reject anything that doesn't match
+  if (!id || !UUID_RE.test(id)) {
     id = crypto.randomUUID();
-    const url = new URL(window.location);
-    url.searchParams.set("list", id);
-    window.history.replaceState({}, "", url);
   }
+  const url = new URL(window.location);
+  url.searchParams.set("list", id);
+  window.history.replaceState({}, "", url);
   return id;
 }
 
@@ -83,6 +109,8 @@ function initApp() {
   const emptyMsg   = document.getElementById("empty-msg");
 
   let currentFilter = "all";
+  let sortCol = null;   // "item" | "amount" | "store" | null
+  let sortDir = 1;      // 1 = asc, -1 = desc
   let allItems = [];
 
   // Real-time listener
@@ -92,12 +120,39 @@ function initApp() {
     renderList();
   });
 
+  // Column header sort clicks
+  document.querySelectorAll("th[data-sort]").forEach(th => {
+    th.addEventListener("click", () => {
+      const col = th.dataset.sort;
+      if (sortCol === col) {
+        sortDir *= -1;
+      } else {
+        sortCol = col;
+        sortDir = 1;
+      }
+      renderList();
+    });
+  });
+
   // Render
   function renderList() {
-    const filtered = allItems.filter(item => {
+    let filtered = allItems.filter(item => {
       if (currentFilter === "bought")    return item.bought;
       if (currentFilter === "notbought") return !item.bought;
       return true;
+    });
+
+    if (sortCol) {
+      filtered = [...filtered].sort((a, b) => {
+        const av = (a[sortCol] || "").toLowerCase();
+        const bv = (b[sortCol] || "").toLowerCase();
+        return av < bv ? -sortDir : av > bv ? sortDir : 0;
+      });
+    }
+
+    // Update header indicators
+    document.querySelectorAll("th[data-sort]").forEach(th => {
+      th.dataset.sortActive = th.dataset.sort === sortCol ? (sortDir === 1 ? "asc" : "desc") : "";
     });
 
     tbody.innerHTML = "";
@@ -125,9 +180,9 @@ function initApp() {
   // Add item
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const item   = itemInput.value.trim();
-    const amount = amtInput.value.trim();
-    const store  = storeInput.value.trim();
+    const item   = itemInput.value.trim().slice(0, 200);  // M1 — enforce max length
+    const amount = amtInput.value.trim().slice(0, 50);
+    const store  = storeInput.value.trim().slice(0, 50);
     if (!item) return;
     await addDoc(itemsRef, { item, amount, store, bought: false, createdAt: serverTimestamp() });
     form.reset();
@@ -143,8 +198,12 @@ function initApp() {
     }
   });
 
+  // L3 — confirm before delete
   tbody.addEventListener("click", async (e) => {
     if (e.target.classList.contains("del-btn")) {
+      const row = e.target.closest("tr");
+      const itemName = row?.querySelector(".col-item")?.textContent || "this item";
+      if (!confirm(`Remove "${itemName}"?`)) return;
       await deleteDoc(doc(db, "lists", LIST_ID, "items", e.target.dataset.id));
     }
   });

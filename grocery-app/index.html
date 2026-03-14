@@ -48,9 +48,14 @@
     <!-- Add item form -->
     <section class="add-section">
       <form id="add-form" autocomplete="off">
-        <input id="input-item"   type="text" placeholder="Item *"  required />
-        <input id="input-amount" type="text" placeholder="Amount" />
-        <input id="input-store"  type="text" placeholder="Store"  />
+        <input id="input-item"   type="text" placeholder="Item *"  required maxlength="200" />
+        <input id="input-amount" type="text" placeholder="Amount" maxlength="50" />
+        <select id="input-store">
+          <option value="">Store</option>
+          <option value="Desi">Desi</option>
+          <option value="Freddy">Freddy</option>
+          <option value="Costco">Costco</option>
+        </select>
         <button type="submit">Add</button>
       </form>
     </section>
@@ -67,9 +72,9 @@
       <table>
         <thead>
           <tr>
-            <th class="col-item">Item</th>
-            <th class="col-amount">Amount</th>
-            <th class="col-store">Store</th>
+            <th class="col-item"   data-sort="item">Item</th>
+            <th class="col-amount" data-sort="amount">Amount</th>
+            <th class="col-store"  data-sort="store">Store</th>
             <th class="col-check">✓</th>
             <th class="col-del"></th>
           </tr>

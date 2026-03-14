@@ -3,8 +3,8 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebas
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDjE3gX6kP1rtWRfO25p_8MXlkUZuPRyf0",
-  authDomain: "grocery-list-c16cb.firebaseapp.com",
+  apiKey: "AIzaSyBiqNN55PP4FEi823cQaewOoUJo85GQ3AI",
+  authDomain: "grocery-list-c16cb.web.app",
   projectId: "grocery-list-c16cb",
   storageBucket: "grocery-list-c16cb.firebasestorage.app",
   messagingSenderId: "966337773448",

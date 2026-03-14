@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /lists/{listId}/items/{itemId} {
+      // Must be signed in and listId must be a valid UUID (36 chars, specific format)
+      allow read, write: if request.auth != null
+        && listId.matches('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$')
+        && request.resource.data.keys().hasOnly(['item', 'amount', 'store', 'bought', 'createdAt'])
+        && request.resource.data.item is string
+        && request.resource.data.item.size() <= 200
+        && request.resource.data.amount is string
+        && request.resource.data.amount.size() <= 50
+        && request.resource.data.store is string
+        && request.resource.data.store.size() <= 50
+        && request.resource.data.bought is bool;
+    }
+  }
+}

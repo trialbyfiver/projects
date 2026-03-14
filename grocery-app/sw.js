@@ -1,10 +1,11 @@
-const CACHE = "grocery-v1";
+const CACHE = "grocery-v4";
 const ASSETS = [
   "./index.html",
   "./style.css",
   "./app.js",
-  "./firebase-config.js",
-  "./manifest.json"
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 self.addEventListener("install", e => {
@@ -24,10 +25,20 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
-  // Network-first for Firebase, cache-first for app shell
-  if (e.request.url.includes("firestore") || e.request.url.includes("firebase")) {
-    return; // Let Firebase handle its own requests
+  const url = e.request.url;
+
+  // M4 — always fetch firebase-config fresh (never cache credentials)
+  if (url.includes("firebase-config.js")) {
+    e.respondWith(fetch(e.request));
+    return;
   }
+
+  // Network-first for all Firebase/Google requests
+  if (url.includes("firestore") || url.includes("firebase") || url.includes("googleapis")) {
+    return;
+  }
+
+  // Cache-first for app shell
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
